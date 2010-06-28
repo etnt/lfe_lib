@@ -1,7 +1,18 @@
 ;; Created 23 Jun 2010 by Torbjorn Tornkvist <tobbe@tornkvist.org>
+;; Inspired by the Haskell prelude.
+
+;; erl -pa ./ebin -noshell -noinput -s lfe_boot start
+;; > (slurp "src/prelude.lfe")
 
 (defmodule prelude
+  (export (null? 1))
+  (export (.. 2))
   (export (reverse 1))
+  (export (drop 2))
+  (export (take 2))
+  (export (rotate 2))
+  (export (splitAt 2))
+  (export (span 2))
   (export (zip 2))
   (export (unzip 1))
   (export (map 2))
@@ -18,12 +29,15 @@
 ;;
 (define-syntax catch-throw
   (macro 
-   ((e) `(try ,e
-	      (catch
-		  ((tuple 'throw n o) n))))))
+    ((e) `(try ,e
+	    (catch
+	      ((tuple 'throw n o) n))))))
 
-
-(defun null_p (lst)
+;;
+;; > (null? '()).            
+;; true
+;;
+(defun null? (lst)
   (if (== lst ()) 'true 'false))
 
 ;;
@@ -34,6 +48,48 @@
              ((() acc) acc)
              (((x . xs) acc) (rev xs (cons x acc)))))
     (rev list '())))
+
+;;
+;; > (drop 2 '(1 2 3 4 5 6)) 
+;; (3 4 5 6)
+;;
+(defun drop (n lst)
+  (if (=< n 0) lst (drop (- n 1) (cdr lst))))
+
+;;
+;; > (take 2 '(1 2 3 4 5 6)) 
+;; (1 2)
+;;
+(defun take (n lst)
+  (if (=< n 0) '() (cons (car lst) (take (- n 1) (cdr lst)))))
+
+;;
+;; > (rotate 2 '(1 2 3 4 5 6))
+;; (3 4 5 6 1 2)
+;;
+(defun rotate (n lst)
+  (: lists append (drop n lst) (take n lst)))
+
+;;
+;; > (splitAt 5 (.. 1 12))
+;; #((1 2 3 4 5) (6 7 8 9 10 11 12))
+;;
+(defun splitAt (n lst)
+  (tuple (take n lst) (drop n lst)))
+
+;;
+;; > (span (lambda (x) (< x 7)) (.. 1 12))
+;; #((1 2 3 4 5 6) (7 8 9 10 11 12))
+;;
+(defun span (p lst)
+  (tuple (takeWhile p lst) (dropWhile p lst)))
+
+;;
+;; > (.. 1 10)               
+;; (1 2 3 4 5 6 7 8 9 10)
+;;
+(defun .. (from to)
+  (: lists seq from to))
 
 ;;
 ;; prelude:zip([1,2,3,4],[a,b,c,d]).
@@ -87,7 +143,7 @@
 (defun takeWhile 
   ((f (x . xs))
    (if (funcall f x)
-      (cons x (takeWhile f xs))
+     (cons x (takeWhile f xs))
      ()))
   ((f ())
    ()))
@@ -98,7 +154,7 @@
 (defun dropWhile 
   ((f (x . xs))
    (if (funcall f x)
-      (dropWhile f xs)
+     (dropWhile f xs)
      (cons x xs)))
   ((f ())
    ()))
@@ -110,7 +166,7 @@
   (foldr 
    (lambda (x xs)
      (if (funcall f x)
-	 (cons x xs)
+       (cons x xs)
        xs))
    '() lst))
 
@@ -122,9 +178,7 @@
     (foldl 
      (lambda (x b)
        (if (funcall f x)
-	   (throw 'true)
+	 (throw 'true)
 	 b))
      'false lst)))
 
-	 
-  
