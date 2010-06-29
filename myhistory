@@ -1,0 +1,7 @@
+(slurp '"src/prelude.lfe")
+(: prelude take 3 '(1 2 3 4 5 6))
+(slurp '"src/macros.lfe")
+(curry add (x y) (+ x y))
+
+
+

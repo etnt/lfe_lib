@@ -6,11 +6,11 @@ function run {
 }
 
 
-export PATH=/home/matsw/otp_installed/bin:$PATH
+#export PATH=/home/matsw/otp_installed/bin:$PATH
 
-run $'\003'  
-run $'a\n'
-run $'clear\n'
-run $"$(cat test)"
+#run $'\003'  
+#run $'a\n'
+#run $'clear\n'
+run $"$(cat myhistory)"
 run $'\n'
 

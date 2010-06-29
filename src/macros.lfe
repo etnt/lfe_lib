@@ -6,13 +6,15 @@
   (export (append-to-file 1))
   (export (add1 1))
   (export (add2 1))
-  (export (add3 1))
-  (export (foo 1))
+;  (export (add3 1))
   (export (foo 2))
-  (export (bar 1))
-  (export (bar 2))
+  (export (foo 2))
+ ; (export (bar 1))
+;  (export (bar 2))
 ;  (export (oo 2))
 ;  (export (abc 1))
+   (export (start 0))
+  (import (from prelude (splitAt 2) (drop 2) (take 2)))
   )
 
 ;;
@@ -72,55 +74,35 @@
 
 (defun add1 (x) (+ x 1))
 (defun add2 (x) (+ x 2))
-(defun add3 (x) (+ x 3))
+;(defun add3 (x) (+ x 3))
 
 	 
 (defun foo (x) (lambda (y) (foo x y)))
 (defun foo (x y) (+ x y))
 
-(defmacro curry (f)
-  `(defun ,f (x) (lambda (y) (,f x y))))
+(defun start ()
+  (macrolet ((f (args `(: io format ,@args))))
+    (f '"Hello Macro ~p~n" '("hejsan"))))
 
-(defun bar (x y) (+ x y))
 
-(curry bar)
 
-;(defmacro splice (lst)
-;  `,@lst)
+	     
+(defmacro curry (f args body)
+  (let* ((def `'(defun ,f ,args ,body))
+	 (defs `(cons ,def (curry-1 ,f ,args))))
+    defs))
 
-;(defun splice
-;  ((defun add (x y) (+ x y))
-;   (defun sub (x y) (- x y))))
 
-;; (o f g) ==> (lambda (x) (f (g x))) 
+(defmacro curry-1 (f args)
+  (let ((len (: erlang length args)))
+    (cond ((== len 1) `'((defun ,f () (lambda ,args (,f ,@args)))))
+	  (else
+	   (let* ((args0 (take (- len 1) args))
+		  (var (drop (- len 1) args))
+		  (def `'(defun ,f ,args0 (lambda ,var (,f ,@args)))))
+	     `(cons ,def (curry-1 ,f ,args0)))))))
+	
 
-;(eval-when-compile
-;  (defun oo 
-;    (((x . xs) v)
-;     (: io format "hej~n")
-;     (list x (oo xs v)))
-;    (((x) v) (list x v))))
+;(curry add (x y) (+ x y))
 
-;(eval-when-compile
-;  (defun oo (fs v)
-;    (let (((x . xs) (: lists reverse fs)))
-;      (: lists foldl (lambda (e acc) (list e acc)) (list x v) xs))))
-
-;  (((x) v) 
-;   (list x v))
-;  (((x . xs) v)
-;   (let ((z (oo xs v)))
-;     (list x (list z)))))
-
-; (o '(foo bar))
-; (lambda (z) (foo (bar z)))
-
-;(defmacro o (fs v)
-;   (let* (((x . xs) (: lists reverse fs))
-;	  (os (: lists foldl (lambda (e acc) (list e acc)) (list x v) xs)))
-;     os))
-
-;(defun abc (x)
-;  (let ((f (o '(add1 add2 add3) x)))
-;    (funcall f x)))
 
