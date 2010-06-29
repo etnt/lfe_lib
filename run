@@ -1,0 +1,16 @@
+#!/bin/bash
+
+function run {
+    screen -X stuff "$1"
+    sleep 0.02
+}
+
+
+export PATH=/home/matsw/otp_installed/bin:$PATH
+
+run $'\003'  
+run $'a\n'
+run $'clear\n'
+run $"$(cat test)"
+run $'\n'
+
